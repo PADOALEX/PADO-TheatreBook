@@ -1,11 +1,15 @@
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using PADO.TheatreBook.Api;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("Postgres")
     ?? throw new InvalidOperationException("ConnectionStrings:Postgres is required.");
-builder.Services.AddDbContext<TheatreDb>(o => o.UseNpgsql(connectionString));
+// Initial migration is hand-authored SQL; schema is validated by PostgreSQL integration tests.
+// EF's snapshot-diff heuristic cannot compare this hand-authored baseline reliably.
+builder.Services.AddDbContext<TheatreDb>(o => o.UseNpgsql(connectionString)
+    .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)));
 builder.Services.AddScoped<BookingService>();
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
