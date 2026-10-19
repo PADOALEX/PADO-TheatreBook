@@ -14,6 +14,16 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 {
     public const string AdminEmail = "integration-admin@theatrebook.test";
     public const string AdminPassword = "Integration-Admin-Password-2026";
+    public ApiFactory()
+    {
+        // Minimal hosting reads initial configuration before ConfigureAppConfiguration.
+        // Prepare just this test process before WebApplicationFactory starts Program.
+        var connection = Environment.GetEnvironmentVariable("TEST_DB_CONNECTION")
+            ?? throw new InvalidOperationException("TEST_DB_CONNECTION must point to a disposable PostgreSQL test DB");
+        Environment.SetEnvironmentVariable("ConnectionStrings__Postgres", connection);
+        Environment.SetEnvironmentVariable("Security__JwtKey",
+            "TheatreBook-Integration-Test-Key-Never-Use-Outside-Tests-2026");
+    }
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Development");
