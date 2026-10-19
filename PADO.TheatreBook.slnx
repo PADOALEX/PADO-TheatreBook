@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/PADO.TheatreBook.Api/PADO.TheatreBook.Api.csproj" />
+  <Project Path="tests/PADO.TheatreBook.Tests/PADO.TheatreBook.Tests.csproj" />
+</Solution>

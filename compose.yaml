@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: theatre
+      POSTGRES_DB: theatrebook
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - theatrebook-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U theatre -d theatrebook"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    restart: unless-stopped
+
+  api:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=theatrebook;Username=theatre;Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}"
+      Security__JwtKey: "${JWT_KEY:?Set JWT_KEY}"
+      Admin__Email: "${ADMIN_EMAIL:?Set ADMIN_EMAIL}"
+      Admin__Password: "${ADMIN_PASSWORD:?Set ADMIN_PASSWORD}"
+    restart: unless-stopped
+
+volumes:
+  theatrebook-data:
