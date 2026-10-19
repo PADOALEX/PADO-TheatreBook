@@ -67,7 +67,7 @@ export TEST_DB_CONNECTION='Host=localhost;Port=5432;Database=theatrebook_tests;U
 dotnet test PADO.TheatreBook.slnx -c Release --no-build
 ```
 
-PowerShell: `$env:TEST_DB_CONNECTION = 'Host=localhost;Port=5432;Database=theatrebook_tests;Username=theatre;Password=your-test-secret'` before `dotnet test`. GitHub Actions runs the same tests with a PostgreSQL service. Tests are **not** backed by EF InMemory.
+PowerShell: `$env:TEST_DB_CONNECTION = 'Host=localhost;Port=5432;Database=theatrebook_tests;Username=theatre;Password=your-test-secret'` before `dotnet test`. GitHub Actions runs the same tests with a PostgreSQL service and separately builds/starts the full Docker Compose stack for an HTTP health smoke test. Tests are **not** backed by EF InMemory.
 
 ## Project layout
 
