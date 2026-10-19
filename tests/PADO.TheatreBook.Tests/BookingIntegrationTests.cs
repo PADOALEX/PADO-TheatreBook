@@ -173,4 +173,49 @@ public sealed class BookingIntegrationTests : IClassFixture<ApiFactory>
             new { name = "Unauthorized", rows = 1, seatsPerRow = 1 });
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
+
+    [Fact]
+    public async Task Concurrent_overlapping_schedules_have_only_one_winner()
+    {
+        var (id, _, admin) = await SetupAsync();
+        using (admin)
+        {
+            var existing = await ReadAsync(await admin.GetAsync($"/api/performances/{id}"));
+            var hallId = existing.GetProperty("hallId").GetGuid();
+            var list = await ReadAsync(await admin.GetAsync("/api/performances"));
+            var productionId = list.EnumerateArray()
+                .Single(x => x.GetProperty("id").GetGuid() == id)
+                .GetProperty("productionId").GetGuid();
+            var startsAt = existing.GetProperty("endsAtUtc").GetDateTimeOffset().AddHours(3);
+
+            var attempts = await Task.WhenAll(Enumerable.Range(0, 8).Select(_ =>
+                admin.PostAsJsonAsync("/api/performances",
+                    new { hallId, productionId, startsAt, priceUah = 180m })));
+            Assert.Equal(1, attempts.Count(x => x.StatusCode == HttpStatusCode.Created));
+            Assert.Equal(7, attempts.Count(x => x.StatusCode == HttpStatusCode.Conflict));
+        }
+    }
+
+    [Fact]
+    public async Task Active_reservation_prevents_show_cancellation()
+    {
+        var (id, seatId, admin) = await SetupAsync();
+        using (admin)
+        using (var customer = await CustomerAsync())
+        {
+            var booking = await customer.PostAsJsonAsync(
+                $"/api/performances/{id}/reservations", new { seatId });
+            Assert.Equal(HttpStatusCode.Created, booking.StatusCode);
+            var bookingId = (await ReadAsync(booking)).GetProperty("id").GetGuid();
+
+            Assert.Equal(HttpStatusCode.Conflict,
+                (await admin.PostAsync($"/api/performances/{id}/cancel", null)).StatusCode);
+            Assert.Equal(HttpStatusCode.OK,
+                (await customer.PostAsync($"/api/reservations/{bookingId}/cancel", null)).StatusCode);
+            Assert.Equal(HttpStatusCode.OK,
+                (await admin.PostAsync($"/api/performances/{id}/cancel", null)).StatusCode);
+            Assert.Equal(HttpStatusCode.Conflict,
+                (await customer.PostAsJsonAsync($"/api/performances/{id}/reservations", new { seatId })).StatusCode);
+        }
+    }
 }

@@ -2,7 +2,7 @@
 
 **Theatre Booking & Ticket Management API** — a .NET 10 / PostgreSQL backend rebuilt from two educational C++ theatre systems, with database-enforced protection against concurrent double booking.
 
-![.NET 10](https://img.shields.io/badge/.NET-10-512BD4) ![PostgreSQL 17](https://img.shields.io/badge/PostgreSQL-17-4169E1) ![EF Core](https://img.shields.io/badge/EF%20Core-10-512BD4) ![API](https://img.shields.io/badge/API-REST-blue)
+[![CI](https://github.com/PADOALEX/PADO-TheatreBook/actions/workflows/ci.yml/badge.svg)](https://github.com/PADOALEX/PADO-TheatreBook/actions/workflows/ci.yml) ![.NET 10](https://img.shields.io/badge/.NET-10-512BD4) ![PostgreSQL 17](https://img.shields.io/badge/PostgreSQL-17-4169E1) ![EF Core](https://img.shields.io/badge/EF%20Core-10-512BD4) ![API](https://img.shields.io/badge/API-REST-blue)
 
 ## What it does
 
@@ -13,7 +13,7 @@
 - Issues ticket on demo confirmation; cancellation invalidates it and frees the seat
 - Customer registration/login and JWT roles (Administrator / Customer), ownership checks
 - Seat availability, occupancy/sales reports and historical price-at-booking snapshot in UAH
-- Unit tests plus real-PostgreSQL integration tests, including 12 parallel booking attempts
+- Unit tests plus real-PostgreSQL integration tests, including parallel booking and scheduling attempts
 
 **Payment is simulated. No card collection, payment gateway, real money movement or refunds.**
 

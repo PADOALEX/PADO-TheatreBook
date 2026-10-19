@@ -27,7 +27,7 @@ PostgreSQL's default READ COMMITTED isolation plus row locks, unique index and e
 - Only creation and cancellation are included for shows; destructive modification of halls or existing seats is omitted intentionally to preserve reservation referential integrity.
 - Roles are embedded in two-hour JWTs. Changing a role would require token expiry; there is no role-edit API.
 - No external payment callbacks/webhooks, real financial settlement or expiring holds.
-- The startup migrator assumes one API instance in a demo. In a scaled deployment, run EF migrations in a controlled one-time deployment step, and disable startup migration by code change before multi-replica deployment.
+- The initial PostgreSQL migration is hand-authored SQL. EF Core's pending-model-changes heuristic is suppressed for this baseline; functional constraints are verified against PostgreSQL in CI. All future model changes require deliberate SQL migrations and matching snapshot updates. Do not rely on the suppressed heuristic to detect schema drift.\n- The startup migrator assumes one API instance in a demo. In a scaled deployment, run EF migrations in a controlled one-time deployment step, and disable startup migration by code change before multi-replica deployment.
 - No request idempotency token yet: a network retry for a *different* seat creates another reservation. Duplicate booking of the *same* seat remains safe.
 - Concurrency tests should run on real PostgreSQL (never substitute EF Core InMemory/SQLite).
 - Test DB in CI is disposable. Running integration tests against a shared live DB is not supported.
