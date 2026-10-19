@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace PADO.TheatreBook.Api;
 
@@ -75,7 +76,7 @@ public static class AuthService
 
     public static void MapAuth(RouteGroupBuilder api)
     {
-        var group = api.MapGroup("/auth");
+        var group = api.MapGroup("/auth").RequireRateLimiting("auth");
         group.MapPost("/register", async (RegisterRequest input, TheatreDb db,
             IPasswordHasher<AppUser> hasher, CancellationToken ct) =>
         {
